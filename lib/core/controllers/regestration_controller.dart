@@ -1,7 +1,6 @@
 // ignore_for_file: unused_local_variable, avoid_print, unnecessary_nullable_for_final_variable_declarations
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:health_care/core/constants/api_endpointes.dart';
@@ -20,56 +19,75 @@ class RegisterationController extends GetxController {
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  Future<void> registerWithEmail() async {
+  Future<void> registerWithEmail(BuildContext context) async {
     try {
       var headers = {'Content-Type': 'application/json'};
       var url = Uri.parse(
-          ApiEndpoints.baseUrl + ApiEndpoints.authEndPoints.registerEmail);
+        ApiEndpoints.baseUrl + ApiEndpoints.authEndPoints.registerEmail,
+      );
 
-      Map body = {
-        "firstName": firstNameController.text,
-        "lastName": lastNameController.text,
+      Map<String, dynamic> body = {
+        "firstName": firstNameController.text.trim(),
+        "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "password": passwordController.text,
         "confirmPassword": confirmPasswordController.text,
       };
 
-      http.Response response = await http.post(url, body: jsonEncode(body), headers: headers);
+      http.Response response = await http.post(
+        url,
+        body: jsonEncode(body),
+        headers: headers,
+      );
 
-      if (response.statusCode == 200) {
-        Get.toNamed(XServicesStrings.createHealthProfile);
-        final json = jsonDecode(response.body);
-        if (json['code'] == 0) {
-          var token = json['data']['Token'];
-          print(token);
-          final SharedPreferences? prefs = await _prefs;
-          firstNameController.clear();
-          lastNameController.clear();
-          emailController.clear();
-          passwordController.clear();
-          confirmPasswordController.clear();
-          levelController.clear();
-          classController.clear();
+      final json = jsonDecode(response.body);
 
-          
+      print('Status Code: ${response.statusCode}');
+      print('Response JSON: $json');
+
+      if (response.statusCode == 200 && json['message'] == 'Registration successful.') {
+        // Check if token exists in response (optional, based on API)
+        String? token;
+        if (json['data'] != null && json['data']['Token'] != null) {
+          token = json['data']['Token'];
+          final SharedPreferences prefs = await _prefs;
+          await prefs.setString('token', token.toString());
+          print('Saved token: $token');
         } else {
-          throw json['message'] ?? 'Registration failed. Please try again.';
+          print('No token provided in response');
         }
-        
+
+        // Clear text fields
+        firstNameController.clear();
+        lastNameController.clear();
+        emailController.clear();
+        passwordController.clear();
+        confirmPasswordController.clear();
+        levelController.clear();
+        classController.clear();
+
+        // Navigate to Create Health Profile
+        print('Navigating to Create Health Profile...');
+        Get.toNamed(XServicesStrings.loginScreen);
       } else {
-        throw jsonDecode(response.body)['message'] ?? 'Registration failed.';
+        throw json['message'] ?? 'Registration failed. Please try again.';
       }
     } catch (e) {
       showDialog(
-        context: Get.context!,
+        context: context,
         builder: (context) {
           return SimpleDialog(
             title: Text(
               e.toString(),
-              style: TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 13),
             ),
             contentPadding: const EdgeInsets.all(20),
-            children: [],
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           );
         },
       );

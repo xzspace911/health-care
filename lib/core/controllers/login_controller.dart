@@ -18,10 +18,12 @@ class LoginController extends GetxController {
       var headers = {'Content-Type': 'application/json'};
       var url = Uri.parse(
           ApiEndpoints.baseUrl + ApiEndpoints.authEndPoints.loginEmail);
+
       Map body = {
         'email': emailController.text.trim(),
         'password': passwordController.text,
       };
+
       http.Response response = await http.post(
         url,
         body: jsonEncode(body),
@@ -32,34 +34,32 @@ class LoginController extends GetxController {
 
       if (response.statusCode == 200 && json['accessToken'] != null) {
         final SharedPreferences prefs = await _prefs;
-        await prefs.setString('accessToken', json['accessToken']);
+
+        // ✅ Save token and patient_id with correct keys
+        await prefs.setString('token', json['accessToken']);
+        await prefs.setString('patient_id', json['patient_id'].toString());
+
         emailController.clear();
         passwordController.clear();
 
         Get.toNamed(XServicesStrings.homeScreen);
       } else {
-        throw jsonDecode(response.body)['Message'] ?? 'Unknown Error Occured';
+        throw jsonDecode(response.body)['Message'] ?? 'Unknown error occurred';
       }
     } catch (e) {
       showDialog(
         context: Get.context!,
         builder: (context) {
           return SimpleDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            title: Text(
-              'Error',
-              style: TextStyle(
-                color: Colors.red,
-              ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            contentPadding: EdgeInsets.all(20),
-            children: [
+            title: const Text('Error', style: TextStyle(color: Colors.red)),
+            contentPadding: const EdgeInsets.all(20),
+            children: const [
               Text(
-                'invalid email or password',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
+                'Invalid email or password',
+                style: TextStyle(fontWeight: FontWeight.w500),
               ),
             ],
           );

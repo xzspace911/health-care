@@ -1,7 +1,6 @@
-// ignore_for_file: unused_local_variable, avoid_print, unnecessary_nullable_for_final_variable_declarations
+// --- GeneralInfoController (Updated for Full GetX Routing) ---
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:health_care/core/constants/api_endpointes.dart';
@@ -10,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class GeneralInfoController extends GetxController {
-  TextEditingController dateOfBirthController= TextEditingController();
+  TextEditingController dateOfBirthController = TextEditingController();
   TextEditingController genderController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   TextEditingController heightController = TextEditingController();
@@ -23,44 +22,65 @@ class GeneralInfoController extends GetxController {
 
   Future<void> registerGeneralInfo() async {
     try {
-      var headers = {'Content-Type': 'application/json'};
-      var url = Uri.parse(
-          ApiEndpoints.patientBaseUrl + ApiEndpoints.authEndPoints.generalInfo);
+      final SharedPreferences prefs = await _prefs;
+      final token = prefs.getString('token');
 
-      Map body = {
-        "doctorEmail": doctorEmailController.text.trim(),
-        "dateOfBirth": dateOfBirthController.text,
-        "weight": weightController.hashCode,
-        "height": heightController.hashCode,
-        "hasSmokingHistory" : hasSmokingController.isBlank,
-        "hasFamilyHistory" : hasFamilyController.isBlank,
-        "diseases" : diseaseController.hashCode,
+      print('Retrieved Token: $token');
+
+      final headers = {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
       };
 
-      http.Response response = await http.post(url, body: jsonEncode(body), headers: headers);
+      final url = Uri.parse(
+        ApiEndpoints.patientBaseUrl + ApiEndpoints.authEndPoints.generalInfo,
+      );
 
-      if (response.statusCode == 200) {
+      final Map<String, dynamic> body = {
+        "doctorEmail": doctorEmailController.text.trim(),
+        "dateOfBirth": dateOfBirthController.text.trim(),
+        "gender": genderController.text.trim(),
+        "weight": double.tryParse(weightController.text.trim()) ?? 0.0,
+        "height": double.tryParse(heightController.text.trim()) ?? 0.0,
+        "hasSmokingHistory": hasSmokingController.text.trim().toLowerCase() == 'yes',
+        "hasFamilyHistory": hasFamilyController.text.trim().toLowerCase() == 'yes',
+        "diseases": int.tryParse(diseaseController.text.trim()) ?? 0,
+      };
+
+      print('Request Body: ${jsonEncode(body)}');
+
+      final http.Response response = await http.post(
+        url,
+        body: jsonEncode(body),
+        headers: headers,
+      );
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: "${response.body}"');
+
+      if (response.statusCode == 401) {
+        throw 'Unauthorized. Please log in again. (Missing or invalid token)';
+      }
+
+      if (response.body.trim().isEmpty) {
+        throw 'Empty response from server.';
+      }
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        doctorEmailController.clear();
+        dateOfBirthController.clear();
+        weightController.clear();
+        heightController.clear();
+        hasSmokingController.clear();
+        hasFamilyController.clear();
+        diseaseController.clear();
+        genderController.clear();
+
         Get.toNamed(XServicesStrings.loginScreen);
-        final json = jsonDecode(response.body);
-        if (json['code'] == 0) {
-          var token = json['data']['Token'];
-          print(token);
-          final SharedPreferences? prefs = await _prefs;
-          doctorEmailController.clear();
-          dateOfBirthController.clear();
-          weightController.clear();
-          heightController.clear();
-          hasSmokingController.clear();
-          hasFamilyController.clear();
-          diseaseController.clear();
-
-          
-        } else {
-          throw json['message'] ?? 'Registration failed. Please try again.';
-        }
-        
       } else {
-        throw jsonDecode(response.body)['message'] ?? 'Registration failed.';
+        throw json['message'] ?? 'Registration failed. Please try again.';
       }
     } catch (e) {
       showDialog(

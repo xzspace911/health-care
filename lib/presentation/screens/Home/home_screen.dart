@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:health_care/core/constants/services_strings.dart';
 import 'package:health_care/presentation/Utils/colors.dart';
 import 'package:health_care/presentation/Utils/images.dart';
@@ -186,29 +187,25 @@ class HomeScreen extends StatelessWidget {
                         color: XColors.green,
                         image: XImages.doctorImage,
                         name: XStrings.aiDoctor,
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(XServicesStrings.aiDoctorScreen),
+                        onPressed: () => Get.toNamed(XServicesStrings.aiDoctorScreen),
                       ),
                       AppFunctions(
                         color: XColors.purble,
                         image: XImages.pressureImage,
                         name: XStrings.heartPressure,
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(XServicesStrings.heartPressure),
+                        onPressed: () => Get.toNamed(XServicesStrings.heartPressure),
                       ),
                       AppFunctions(
                         color: XColors.orange,
                         image: XImages.bloodImage,
                         name: XStrings.sugarInBlood,
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(XServicesStrings.sugarInBlood),
+                        onPressed: () => Get.toNamed(XServicesStrings.sugarInBlood),
                       ),
                       AppFunctions(
                         color: XColors.blue,
                         image: XImages.clinicImage,
                         name: XStrings.clinic,
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(XServicesStrings.clinic),
+                        onPressed: () => Get.toNamed(XServicesStrings.clinic),
                       ),
                     ],
                   ),

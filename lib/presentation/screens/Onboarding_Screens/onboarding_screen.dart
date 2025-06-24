@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:health_care/core/constants/services_strings.dart';
 import 'package:health_care/presentation/Utils/colors.dart';
 import 'package:health_care/presentation/Utils/images.dart';
@@ -46,8 +47,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 height: XResponsive.xHeight(context) / 14,
                 child: ElevatedButton(
-                    onPressed: () => Navigator.of(context)
-                        .pushNamed(XServicesStrings.loginScreen),
+                    onPressed: () => Get.toNamed(XServicesStrings.loginScreen),
                     style: ButtonStyle(
                       backgroundColor: WidgetStatePropertyAll(XColors.primary),
                       shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
@@ -69,8 +69,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 height: XResponsive.xHeight(context) / 14,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(XServicesStrings.signUpScreen),
+                  onPressed: () => Get.toNamed(XServicesStrings.signUpScreen),
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(XColors.white),
                     shape: WidgetStatePropertyAll<RoundedRectangleBorder>(

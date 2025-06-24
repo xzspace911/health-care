@@ -1,28 +1,44 @@
+// --- CreatingHealthProfile Page (UI) ---
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:health_care/core/constants/services_strings.dart';
 import 'package:health_care/presentation/Utils/colors.dart';
 import 'package:health_care/presentation/Utils/responsive.dart';
 import 'package:health_care/presentation/Utils/strings.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:health_care/core/controllers/general_info_controller.dart';
 
 class CreatingHealthProfile extends StatefulWidget {
   const CreatingHealthProfile({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _CreatingHealthProfileState createState() => _CreatingHealthProfileState();
 }
 
 class _CreatingHealthProfileState extends State<CreatingHealthProfile> {
-  List<String> items = [
+  final GeneralInfoController generalInfoController =
+      Get.put(GeneralInfoController());
+
+  Map<String, int> diseaseMap = {
+    'High blood pressure': 1,
+    'Heart disease': 2,
+    'Diabetes': 3,
+  };
+
+  List<String> diseaseItems = [
     'Select Your Disease',
     'High blood pressure',
     'Heart disease',
     'Diabetes'
   ];
-  String? selectedItem = 'Select Your Disease';
-  List<String> gender = ['Male', 'Female'];
-  List<String> choice = ['Yes', 'No'];
+  List<String> genderItems = ['Male', 'Female'];
+  List<String> choiceItems = ['Yes', 'No'];
+
+  String? selectedDisease = 'Select Your Disease';
+  String? selectedGender = 'Male';
+  String? selectedSmoking = 'No';
+  String? selectedFamily = 'No';
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +96,10 @@ class _CreatingHealthProfileState extends State<CreatingHealthProfile> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 120),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 120),
                 child: Container(
-                  height: XResponsive.xHeight(context)/1.44,
+                  height: XResponsive.xHeight(context) / 1.4,
                   width: XResponsive.xWidth(context),
                   decoration: BoxDecoration(
                     color: XColors.white,
@@ -100,197 +117,162 @@ class _CreatingHealthProfileState extends State<CreatingHealthProfile> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: XResponsive.xHeight(context) / 15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              label: Text(XStrings.doctorEmail),
-                              prefixIcon: Icon(Iconsax.personalcard_copy),
-                            ),
+                        TextField(
+                          controller:
+                              generalInfoController.doctorEmailController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
+                            label: Text(XStrings.doctorEmail),
+                            prefixIcon: Icon(Iconsax.personalcard_copy),
                           ),
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 60),
-                        SizedBox(
-                          height: XResponsive.xHeight(context) / 15,
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(18)),
-                                  borderSide:
-                                      BorderSide(color: XColors.primary)),
-                            ),
-                            value: items.contains(selectedItem)
-                                ? selectedItem
-                                : 'Select Your Disease', // Ensure valid value
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedItem = newValue; // Update the selected value
-                              });
-                            },
-                            items: items
-                                .map((item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    ))
-                                .toList(),
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
+                          value: selectedDisease,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedDisease = value;
+                              generalInfoController.diseaseController.text =
+                                  diseaseMap[value!] != null
+                                      ? diseaseMap[value!].toString()
+                                      : '0';
+                            });
+                          },
+                          items: diseaseItems
+                              .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(item),
+                                  ))
+                              .toList(),
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 60),
-                        SizedBox(
-                          height: XResponsive.xHeight(context) / 15,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              label: Text(XStrings.dateOfBirth),
-                              suffixIcon: Icon(
-                                Iconsax.calendar,
-                                color: XColors.primary,
-                              ),
+                        TextField(
+                          controller: generalInfoController.dateOfBirthController,
+                          readOnly: true,
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (date != null) {
+                              generalInfoController.dateOfBirthController.text =
+                                  date.toIso8601String();
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: XStrings.dateOfBirth,
+                            suffixIcon: Icon(Iconsax.calendar,
+                            color: XColors.primary,
                             ),
-                            keyboardType: TextInputType.datetime,
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 60),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: XResponsive.xWidth(context) / 2.65,
-                              height: XResponsive.xHeight(context) / 16,
+                            Expanded(
                               child: TextField(
+                                controller:
+                                    generalInfoController.heightController,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                      borderRadius: BorderRadius.circular(18)),
                                   label: Text(XStrings.height),
-                                  suffixIcon: Icon(
-                                    Iconsax.ruler,
-                                    color: XColors.primary,
-                                  ),
+                                  suffixIcon: Icon(Iconsax.ruler,
+                                      color: XColors.primary),
                                 ),
-                                keyboardType:
-                                    TextInputType.numberWithOptions(),
+                                keyboardType: TextInputType.numberWithOptions(),
                               ),
                             ),
-                            SizedBox(
-                              width: XResponsive.xWidth(context) / 2.6,
-                              height: XResponsive.xHeight(context) / 16,
+                            SizedBox(width: 12),
+                            Expanded(
                               child: TextField(
+                                controller:
+                                    generalInfoController.weightController,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                      borderRadius: BorderRadius.circular(18)),
                                   label: Text(XStrings.weight),
-                                  suffixIcon: Icon(
-                                    Iconsax.weight,
-                                    color: XColors.primary,
-                                  ),
+                                  suffixIcon: Icon(Iconsax.weight,
+                                      color: XColors.primary),
                                 ),
-                                keyboardType:
-                                    TextInputType.numberWithOptions(),
+                                keyboardType: TextInputType.numberWithOptions(),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 60),
                         Text(XStrings.selectYourGender),
-                        SizedBox(height: XResponsive.xHeight(context) / 80),
-                        SizedBox(
-                          height: XResponsive.xHeight(context) / 16,
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(18)),
-                                  borderSide:
-                                      BorderSide(color: XColors.primary)),
-                            ),
-                            value: gender.contains(selectedItem)
-                                ? selectedItem
-                                : 'Male', // Ensure valid value
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedItem = newValue; // Update the selected value
-                              });
-                            },
-                            items: gender
-                                .map((item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    ))
-                                .toList(),
+                        DropdownButtonFormField<String>(
+                          value: selectedGender,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedGender = value;
+                              generalInfoController.genderController.text =
+                                  value!;
+                            });
+                          },
+                          items: genderItems
+                              .map((item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item),
+                                  ))
+                              .toList(),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 60),
                         Text(XStrings.smoking),
-                        SizedBox(height: XResponsive.xHeight(context) / 90),
-                        SizedBox(
-                          width: double.infinity,
-                          height: XResponsive.xHeight(context) / 16,
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(18)),
-                                  borderSide:
-                                      BorderSide(color: XColors.primary)),
-                            ),
-                            value: choice.contains(selectedItem)
-                                ? selectedItem
-                                : 'No', // Ensure valid value
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedItem =
-                                    newValue; // Update the selected value
-                              });
-                            },
-                            items: choice
-                                .map((item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    ))
-                                .toList(),
+                        DropdownButtonFormField<String>(
+                          value: selectedSmoking,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedSmoking = value;
+                              generalInfoController.hasSmokingController.text =
+                                  value!;
+                            });
+                          },
+                          items: choiceItems
+                              .map((item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item),
+                                  ))
+                              .toList(),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                         SizedBox(height: XResponsive.xHeight(context) / 70),
-                        Text(
-                          XStrings.chronicDiseases,
-                          textAlign: TextAlign.start,
-                        ),
-                        SizedBox(height: XResponsive.xHeight(context) / 100),
-                        SizedBox(
-                          width: double.infinity,
-                          height: XResponsive.xHeight(context) / 16,
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(18)),
-                                  borderSide:
-                                      BorderSide(color: XColors.primary)),
-                            ),
-                            value: choice.contains(selectedItem)
-                                ? selectedItem
-                                : 'No',
-                            // Ensure valid value
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedItem =
-                                    newValue; // Update the selected value
-                              });
-                            },
-                            items: choice
-                                .map((item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    ))
-                                .toList(),
+                        Text(XStrings.chronicDiseases),
+                        DropdownButtonFormField<String>(
+                          value: selectedFamily,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedFamily = value;
+                              generalInfoController.hasFamilyController.text =
+                                  value!;
+                            });
+                          },
+                          items: choiceItems
+                              .map((item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item),
+                                  ))
+                              .toList(),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                       ],
@@ -299,31 +281,31 @@ class _CreatingHealthProfileState extends State<CreatingHealthProfile> {
                 ),
               ),
               Positioned(
-                top: XResponsive.xHeight(context)/1.15,
-                left: XResponsive.xWidth(context)/14,
+                top: XResponsive.xHeight(context) / 1.1,
+                left: XResponsive.xWidth(context) / 14,
                 child: SizedBox(
                   height: 50,
                   width: 325,
                   child: ElevatedButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(XServicesStrings.loginScreen),
-                      style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStatePropertyAll(XColors.primary),
-                        shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                    onPressed: () =>
+                        generalInfoController.registerGeneralInfo(),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(XColors.primary),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: Text(
-                        XStrings.createYourProfile,
-                        style: TextStyle(
-                          color: XColors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      )),
+                    ),
+                    child: Text(
+                      XStrings.createYourProfile,
+                      style: TextStyle(
+                        color: XColors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
-class XTextField extends StatelessWidget {
-  const XTextField({super.key, required this.label, this.suffixIcon, this.prefixIcon});
+class XTextField extends StatefulWidget {
+  const XTextField({super.key, required this.label, this.suffixIcon, this.prefixIcon, this.controller});
   final String label;
   final Icon? suffixIcon;
   final Icon? prefixIcon;
+  final TextEditingController? controller;
 
+  @override
+  State<XTextField> createState() => _XTextFieldState();
+}
+
+class _XTextFieldState extends State<XTextField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -13,15 +19,16 @@ class XTextField extends StatelessWidget {
       child: SizedBox(
         height: 50,
         child: TextField(
+          controller: widget.controller,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             label: Text(
-              label,          
+              widget.label,          
             ),
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: widget.suffixIcon,
           ),
         ),
       ),

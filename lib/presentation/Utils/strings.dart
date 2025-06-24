@@ -60,6 +60,9 @@ class XStrings{
   static const String hypertension = 'Hypertension';
   static const String heartDisease = 'Heart Disease';
   static const String bloodGlucose = 'Blood glucose level';
+  static const String hbA1cLevel = 'HbA1c Level';
+  static const String patientType = 'Patient Type';
+  static const String isFasting = 'Is Fasting ?';
 
   static const String bpm = 'BPM';
 

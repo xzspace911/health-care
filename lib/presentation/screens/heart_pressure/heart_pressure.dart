@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:health_care/core/constants/services_strings.dart';
+import 'package:health_care/core/controllers/heart_pressure_controller.dart';
 import 'package:health_care/presentation/Utils/colors.dart';
 import 'package:health_care/presentation/Utils/responsive.dart';
 import 'package:health_care/presentation/Utils/strings.dart';
@@ -8,7 +10,7 @@ import 'package:health_care/presentation/widgets/text_field.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class HeartPressure extends StatelessWidget {
-  const HeartPressure({super.key});
+   const HeartPressure({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +246,10 @@ class HeartPressure extends StatelessWidget {
   }
 }
 
-Future openDialog(BuildContext context) => showDialog(
+Future openDialog(BuildContext context) {
+  final heartPressureController = Get.put(HeartPressureController());
+
+ return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -257,11 +262,11 @@ Future openDialog(BuildContext context) => showDialog(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              XTextField(label: XStrings.systolic),
-              XTextField(label: XStrings.diastolic),
-              XTextField(label: XStrings.sleepDuration),
-              XTextField(label: XStrings.qualitySleep),
-              XTextField(label: XStrings.physicalActivity),
+              XTextField(label: XStrings.systolic, controller: heartPressureController.systolicController),
+              XTextField(label: XStrings.diastolic, controller: heartPressureController.diastolicController),
+              XTextField(label: XStrings.sleepDuration, controller: heartPressureController.sleepDurationController),
+              XTextField(label: XStrings.qualitySleep, controller: heartPressureController.qualityOfSleepController),
+              XTextField(label: XStrings.physicalActivity, controller: heartPressureController.physicalActivityController),
             ],
           ),
         ),
@@ -270,7 +275,7 @@ Future openDialog(BuildContext context) => showDialog(
             height: XResponsive.xHeight(context) / 14,
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: heartPressureController.submitPrediction,
               style: ElevatedButton.styleFrom(
                 backgroundColor: XColors.primary,
                 shape: RoundedRectangleBorder(
@@ -290,3 +295,4 @@ Future openDialog(BuildContext context) => showDialog(
         ],
       ),
     );
+}

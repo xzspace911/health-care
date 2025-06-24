@@ -154,7 +154,7 @@ class SignupScreen extends StatelessWidget {
                 width: double.infinity,
                 height: XResponsive.xHeight(context) / 15,
                 child: ElevatedButton(
-                  onPressed: () => registerationController.registerWithEmail(),
+                  onPressed: () => registerationController.registerWithEmail(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: XColors.primary,
                     shape: RoundedRectangleBorder(

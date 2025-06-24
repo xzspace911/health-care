@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:health_care/core/constants/services_strings.dart';
+import 'package:health_care/core/controllers/sugar_controller.dart';
 import 'package:health_care/presentation/Utils/colors.dart';
 import 'package:health_care/presentation/Utils/responsive.dart';
 import 'package:health_care/presentation/Utils/strings.dart';
@@ -7,7 +9,8 @@ import 'package:health_care/presentation/widgets/build_chart.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class PluseRate extends StatelessWidget {
-  const PluseRate({super.key});
+  final diabetesController = Get.put(DiabetesPredictionController());
+   PluseRate({super.key});
 
   @override
   Widget build(BuildContext context) {
